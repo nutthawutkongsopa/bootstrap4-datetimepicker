@@ -160,8 +160,8 @@
                 return returnMoment;
             },
 
-            yearOffset = function() {
-                return !!options.yearOffset? Number(options.yearOffset) : 0;
+            yearOffset = function () {
+                return !!options.yearOffset ? Number(options.yearOffset) : 0;
             },
 
             isEnabled = function (granularity) {
@@ -2142,9 +2142,9 @@
             return getMoment(d);
         };
 
-        picker.yearOffset = function(){
+        picker.yearOffset = function () {
             return yearOffset();
-        }
+        };
 
         picker.debug = function (debug) {
             if (typeof debug !== 'boolean') {
