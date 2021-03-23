@@ -160,6 +160,10 @@
                 return returnMoment;
             },
 
+            yearOffset = function() {
+                return !!options.yearOffset? Number(options.yearOffset) : 0;
+            },
+
             isEnabled = function (granularity) {
                 if (typeof granularity !== 'string' || granularity.length > 1) {
                     throw new TypeError('isEnabled expects a single character string parameter');
@@ -596,7 +600,7 @@
                     monthsViewHeader.eq(0).addClass('disabled');
                 }
 
-                monthsViewHeader.eq(1).text(viewDate.year());
+                monthsViewHeader.eq(1).text((viewDate.year() + yearOffset()));
 
                 if (!isValid(viewDate.clone().add(1, 'y'), 'y')) {
                     monthsViewHeader.eq(2).addClass('disabled');
@@ -631,14 +635,14 @@
                     yearsViewHeader.eq(0).addClass('disabled');
                 }
 
-                yearsViewHeader.eq(1).text(startYear.year() + '-' + endYear.year());
+                yearsViewHeader.eq(1).text((startYear.year() + yearOffset()) + '-' + (endYear.year() + yearOffset()));
 
                 if (options.maxDate && options.maxDate.isBefore(endYear, 'y')) {
                     yearsViewHeader.eq(2).addClass('disabled');
                 }
 
                 while (!startYear.isAfter(endYear, 'y')) {
-                    html += '<span data-action="selectYear" class="year' + (startYear.isSame(date, 'y') && !unset ? ' active' : '') + (!isValid(startYear, 'y') ? ' disabled' : '') + '">' + startYear.year() + '</span>';
+                    html += '<span data-action="selectYear" class="year' + (startYear.isSame(date, 'y') && !unset ? ' active' : '') + (!isValid(startYear, 'y') ? ' disabled' : '') + '">' + (startYear.year() + yearOffset()) + '</span>';
                     startYear.add(1, 'y');
                 }
 
@@ -665,7 +669,7 @@
                     decadesViewHeader.eq(0).addClass('disabled');
                 }
 
-                decadesViewHeader.eq(1).text(startDecade.year() + '-' + endDecade.year());
+                decadesViewHeader.eq(1).text((startDecade.year() + yearOffset()) + '-' + (endDecade.year() + yearOffset()));
 
                 if (startDecade.isSame(moment({ y: 2000 })) || (options.maxDate && options.maxDate.isBefore(endDecade, 'y'))) {
                     decadesViewHeader.eq(2).addClass('disabled');
@@ -676,13 +680,13 @@
                     minDateDecade = options.minDate && options.minDate.isAfter(startDecade, 'y') && options.minDate.year() <= endDecadeYear;
                     maxDateDecade = options.maxDate && options.maxDate.isAfter(startDecade, 'y') && options.maxDate.year() <= endDecadeYear;
                     html += '<span data-action="selectDecade" class="decade' + (date.isAfter(startDecade) && date.year() <= endDecadeYear ? ' active' : '') +
-                        (!isValid(startDecade, 'y') && !minDateDecade && !maxDateDecade ? ' disabled' : '') + '" data-selection="' + (startDecade.year() + 6) + '">' + (startDecade.year() + 1) + ' - ' + (startDecade.year() + 12) + '</span>';
+                        (!isValid(startDecade, 'y') && !minDateDecade && !maxDateDecade ? ' disabled' : '') + '" data-selection="' + (startDecade.year() + 6) + '">' + (startDecade.year() + 1 + yearOffset()) + ' - ' + (startDecade.year() + 12 + yearOffset()) + '</span>';
                     startDecade.add(12, 'y');
                 }
                 html += '<span></span><span></span><span></span>'; //push the dangling block over, at least this way it's even
 
                 decadesView.find('td').html(html);
-                decadesViewHeader.eq(1).text((startedAt.year() + 1) + '-' + (startDecade.year()));
+                decadesViewHeader.eq(1).text((startedAt.year() + 1 + yearOffset()) + '-' + (startDecade.year() + yearOffset()));
             },
 
             fillDate = function () {
@@ -703,7 +707,8 @@
                 daysViewHeader.eq(2).find('span').attr('title', options.tooltips.nextMonth);
 
                 daysView.find('.disabled').removeClass('disabled');
-                daysViewHeader.eq(1).text(viewDate.format(options.dayViewHeaderFormat));
+
+                daysViewHeader.eq(1).text(viewDate.clone().add(yearOffset(), 'year').format(options.dayViewHeaderFormat));
 
                 if (!isValid(viewDate.clone().subtract(1, 'M'), 'M')) {
                     daysViewHeader.eq(0).addClass('disabled');
@@ -1008,7 +1013,7 @@
                 },
 
                 selectYear: function (e) {
-                    var year = parseInt($(e.target).text(), 10) || 0;
+                    var year = parseInt(($(e.target).text() - yearOffset()), 10) || 0;
                     viewDate.year(year);
                     if (currentViewMode === minViewModeNumber) {
                         setValue(date.clone().year(viewDate.year()));
@@ -2137,6 +2142,10 @@
             return getMoment(d);
         };
 
+        picker.yearOffset = function(){
+            return yearOffset();
+        }
+
         picker.debug = function (debug) {
             if (typeof debug !== 'boolean') {
                 throw new TypeError('debug() expects a boolean parameter');
@@ -2645,7 +2654,8 @@
         disabledTimeIntervals: false,
         disabledHours: false,
         enabledHours: false,
-        viewDate: false
+        viewDate: false,
+        yearOffset: 0
     };
 
     return $.fn.datetimepicker;
