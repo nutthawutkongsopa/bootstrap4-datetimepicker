@@ -164,6 +164,34 @@
                 return !!options.yearOffset ? Number(options.yearOffset) : 0;
             },
 
+            formatDate = function(d, format){
+                let dummyFormat = (format||"").split("Y").join("?");
+                let dateFormat = d.format(dummyFormat);
+                let adjYear = d.year() + yearOffset();
+                if(dateFormat.match(/\?{4,4}/)){
+                    dateFormat = dateFormat.split("????").join(adjYear)
+                }
+                if(dateFormat.match(/\?{2,2}/)){
+                    dateFormat = dateFormat.split("??").join(adjYear%100)
+                }
+                if(!format || format.match(/L+/)){
+                    dateFormat = dateFormat.replace(/\d{4,4}/, adjYear)
+                }
+                return dateFormat;
+            },
+            formatOffsetBack = function(inputStr){
+                // const d = moment(inputStr)
+                if(inputStr.match(/\d{4}/)){
+                    const year = Number(inputStr.match(/\d{4}/)[0]);
+                    return inputStr.replace(/\d{4,4}/, year - yearOffset());
+                }
+                else
+                 return inputStr
+                
+                // debugger;
+                // inputStr = inputStr.replace(year, year - yearOffset());
+               
+            },
             isEnabled = function (granularity) {
                 if (typeof granularity !== 'string' || granularity.length > 1) {
                     throw new TypeError('isEnabled expects a single character string parameter');
@@ -886,7 +914,7 @@
                 if (isValid(targetMoment)) {
                     date = targetMoment;
                     viewDate = date.clone();
-                    input.val(date.format(actualFormat));
+                    input.val(formatDate(date, actualFormat));
                     element.data('date', date.format(actualFormat));
                     unset = false;
                     update();
@@ -964,6 +992,7 @@
             parseInputDate = function (inputDate) {
                 if (options.parseInputDate === undefined) {
                     if (!moment.isMoment(inputDate) || inputDate instanceof Date) {
+                        inputDate = formatOffsetBack(inputDate);
                         inputDate = getMoment(inputDate);
                     }
                 } else {
@@ -2145,6 +2174,14 @@
         picker.yearOffset = function () {
             return yearOffset();
         };
+
+        picker.formatDate = function(d, format){
+            return formatDate(d, format);
+        }
+
+        picker.formatOffsetBack = function(inputStr){
+            return formatOffsetBack(inputStr);
+        }
 
         picker.debug = function (debug) {
             if (typeof debug !== 'boolean') {
